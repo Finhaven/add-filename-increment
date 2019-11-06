@@ -130,11 +130,20 @@ increment.file = (file, options = {}) => {
     file.base = file.name + file.ext;
   }
 
+  let existsFn = null;
   if (options.fs === true) {
+    existsFn = fs.existsSync;
+  } else if (Array.isArray(options.files)) {
+    existsFn = function(file) {
+      return options.files.indexOf(file) !== -1;
+    };
+  }
+
+  if (existsFn !== null) {
     let name = file.name;
     let dest = path.format(file);
 
-    while (fs.existsSync(dest)) {
+    while (existsFn(dest)) {
       file.base = fn(name, start++) + file.ext;
       dest = path.format(file);
     }
